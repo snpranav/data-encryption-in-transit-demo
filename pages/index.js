@@ -104,13 +104,18 @@ export default function DPG() {
   return (
     <div className="flex min-h-screen flex-col py-2">
       <Head>
-        <title>Create Next App</title>
+        <title>Data Encryption in Transit</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className="grid md:grid-cols-2 grid-cols-1">
         <div className="text-center px-2 my-auto pt-12 md:pt-0">
-          <h1 className="text-6xl font-bold">Encrypt Your Customers' Sensetive Data</h1>
+          <div className="flex flex-col">
+            <h1 className="text-6xl font-bold">Encrypt Your Customers' Sensetive Data</h1>
+
+            {/* Add button that links to Github Source Code */}
+            <a href="https://github.com/snpranav/data-encryption-in-transit-demo"><button className="bg-black text-white p-3 mb-8 rounded-md font-semibold">View Code on <FaGithub className="inline" /></button></a>
+          </div>
           <h3 className="text-3xl font-semibold">With <span className="text-yellow-500">No Change</span> to Your Applications</h3>
         </div>
         <div className="my-auto mx-auto">
@@ -228,7 +233,7 @@ export default function DPG() {
         </div>
       )}
 
-        
+
       <FooterComponent />
     </div>
 

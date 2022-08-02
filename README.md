@@ -33,7 +33,7 @@ services:
 ```
 
 ### Step 2 - Configure DPG policies
-Setup DPG policies in Ciphertrust Manager to encrypt the fields that are encrypted for your POST requests and add a decrypt policy for your get requests.
+Setup [DPG policies](https://thalesdocs.com/ctp/cm/latest/admin/adp_ag/adp-prtcn-policy/create-prtcn-policy/index.html) in Ciphertrust Manager to encrypt the fields that are encrypted for your POST requests and add a decrypt policy for your get requests.
 
 This ensures that the proxy takes care of the encryption and decryption and the database finally ONLY gets encrypted data.
 
