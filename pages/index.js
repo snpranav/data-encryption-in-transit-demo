@@ -3,11 +3,42 @@ import Image from "next/image";
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { SiPostgresql, SiAmazondynamodb, SiMongodb } from "react-icons/si";
+import { HiOutlineIdentification } from "react-icons/hi";
+import axios from "axios";
+import { randomUUID } from "crypto";
+import { EncryptedDataComponent } from "../components/EncryptedData";
+import BouncingArrow from "../components/BouncingArrow";
+import { DecryptedDataComponent } from "../components/DecryptedData";
+import FooterComponent from "../components/Footer";
 
 export default function DPG() {
   const [file, setFile] = useState(null);
   const [tempURL, setTempURL] = useState("");
   const [onFileReadError, setOnFileReadError] = useState(false);
+  const [encryptedData, setEncryptedData] = useState("");
+  const [decryptedData, setDecryptedData] = useState("");
+  const [dbName, setDBName] = useState("");
+  const [recordID, setRecordID] = useState("");
+
+  // React state that maintains form Data
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    dateOfBirth: "",
+    ssn: "",
+    dateOfAppointment: "",
+    insuranceID: "",
+    driversLicenseURL: ""
+  });
+
+  // Handle form input changes
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }));
+  };
 
   const onDrop = useCallback(acceptedFiles => {
     // Temporarily set the file data as a react state.
@@ -23,6 +54,52 @@ export default function DPG() {
     minSize: 0,
     maxSize: 1048576 * 100,
   });
+
+  // `handlePostData` is called when the user clicks the "Submit" button is clicked for each database button.
+  const handlePostData = async (db) => {
+    // Set db type to state.
+    setDBName(db);
+
+
+    let { data } = await axios.post("/api/post-data", formData, {
+      headers: {
+        "Content-Type": "application/json",
+        "db-type": db,
+      }
+    });
+
+    const id = data.id;
+    setRecordID(id);
+
+    // Fetch the encrypted data from the database.
+    const res = await axios.post("/api/get-with-encrypted-fields", {
+      id: id
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        "db-type": db,
+      }
+    });
+
+    // Set the encrypted data as a react state.
+    setEncryptedData(JSON.stringify(res.data, null, 4));
+  }
+
+  // `handlePostData` is called when the user clicks the "Submit" button is clicked for each database button.
+  const handleGetData = async () => {
+
+
+    let { data } = await axios.post(`/api/get-data`,
+      encryptedData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "db-type": dbName,
+        }
+      });
+
+    setDecryptedData(JSON.stringify(data, null, 4));
+  }
 
   return (
     <div className="flex min-h-screen flex-col py-2">
@@ -62,7 +139,7 @@ export default function DPG() {
                 placeholder="Enter patient name"
                 className=" focus:outline-none rounded-md text-black border-2 border-blue-600  px-2 py-3"
                 // value={initialValue}
-                // onChange={handleChange}
+                onChange={e => handleInputChange(e)}
                 name="firstName"
               ></input>
             </div>
@@ -72,7 +149,7 @@ export default function DPG() {
                 type="text"
                 placeholder="Enter Last Name"
                 className=" focus:outline-none rounded-md text-black border-2 border-blue-600  px-2 py-3"
-                // onChange={handleChange}
+                onChange={e => handleInputChange(e)}
                 name="lastName"
               ></input>
             </div>
@@ -82,8 +159,9 @@ export default function DPG() {
             <div className=" flex flex-col flex-1 px-2 py-3">
               <label className="block mb-2 text font-medium text-gray-900">Date of Birth</label>
               <input type="date" id="start" className="focus:outline-none flex-1 px-2 py-3 rounded-md text-black border-2 border-blue-600"
-                min="1900-01-01" max="2022-12-31"
-                name="dob" />
+                min="1900-01-01" max="2018-12-31"
+                onChange={e => handleInputChange(e)}
+                name="dateOfBirth" />
             </div>
             <div className=" flex flex-col flex-1 px-2 py-3">
               <label className="block mb-2 text font-medium text-gray-900">Social Security Number</label>
@@ -91,7 +169,7 @@ export default function DPG() {
                 type="number"
                 placeholder="Enter Social Security Number"
                 className=" focus:outline-none flex-1 px-2 py-3 rounded-md text-black border-2 border-blue-600"
-                // onChange={handleChange}
+                onChange={e => handleInputChange(e)}
                 name="ssn"
               ></input>
             </div>
@@ -102,74 +180,56 @@ export default function DPG() {
               <label className="block mb-2 text font-medium text-gray-900">Date of Appointment</label>
               <input type="date" id="start" className="focus:outline-none flex-1 px-2 py-3 rounded-md text-black border-2 border-blue-600"
                 min="2022-03-20" max="2022-12-31"
-                name="date_of_appointment" />
+                onChange={e => handleInputChange(e)}
+                name="dateOfAppointment" />
             </div>
             <div className=" flex flex-col flex-1 px-2 py-3">
               <label className="block mb-2 text font-medium text-gray-900">Insurance ID</label>
               <input
-                type="number"
+                type="text"
                 placeholder="Enter Social Security Number"
                 className=" focus:outline-none flex-1 px-2 rounded-md text-black border-2 border-blue-600"
-                // onChange={handleChange}
-                name="insurance_id"
+                onChange={e => handleInputChange(e)}
+                name="insuranceID"
               ></input>
             </div>
           </div>
 
-          <div {...getRootProps()} className="mt-8">
-            <label className="block mb-2 text font-medium px-2 py-3 text-gray-900">Upload Insurance Card</label>
-            <div className="flex justify-center items-center w-full" >
-              <input id="dropzone-file" type="file" className="hidden"
-                {...getInputProps()}
-              />
-              <div for="dropzone-file" className="flex flex-col justify-center items-center w-full lg:px-64 md:px-32 px-10 h-64 bg-gray-50 rounded-lg border-2 border-gray-300 border-dashed cursor-pointer dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                <div className="flex flex-col justify-center items-center pt-5 pb-6">
-                  {!file ? (
-                    <>
-                      <svg aria-hidden="true" className="mb-3 w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                      {isDragActive ? (
-                        <>
-                          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">Drop your files <span className='font-semibold'>here 📥</span></p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">any file type (MAX. 100 MB)</p>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <img className='w-20' src={tempURL} />
-                      <p className='text-sm text-gray-500 dark:text-gray-400'>{file.name} | (Size - {(file.size / 1048576).toFixed(2)} MB)</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* 3 buttons in a rowthat say submit to the 3 databases */}
-        <p className="text-xl font-semibold text-center mt-8 mb-2">Submit to</p>
-        <div className="flex justify-center items-center  gap-12">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-xl">Dynamo DB <SiAmazondynamodb className="ml-2 inline" /></button>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-xl">PostgreSQL <SiPostgresql className="ml-2 inline" /></button>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-xl">Mongo DB <SiMongodb className="ml-2 inline" /></button>
+        <p className="text-xl font-semibold text-center mt-8 mb-2">Submit to 👇</p>
+        <div className="flex md:flex-row flex-col justify-center items-center  gap-12">
+          <button className="bg-blue-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded-full text-xl" onClick={e => handlePostData("dynamo")}>Amazon Dynamo DB <SiAmazondynamodb className="ml-2 inline" /></button>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-xl" onClick={e => handlePostData("postgres")}>PostgreSQL <SiPostgresql className="ml-2 inline" /></button>
+          <button className="bg-blue-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full text-xl" onClick={e => handlePostData("mongo")}>Mongo DB <SiMongodb className="ml-2 inline" /></button>
         </div>
       </section>
 
-      <footer className="flex h-24 w-full items-center justify-center border-t">
-        <a
-          className="flex items-center justify-center gap-2"
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-        </a>
-      </footer>
+      {/* Button to decrypt the data */}
+
+
+
+      {encryptedData && (
+        <div className="flex flex-col justify-center items-center">
+          <BouncingArrow />
+          <EncryptedDataComponent cipherText={encryptedData} dbName={dbName.charAt(0).toUpperCase() + dbName.slice(1)} />
+          <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full text-xl" onClick={e => handleGetData()}>Decrypt Data</button>
+        </div>
+      )}
+
+
+
+
+      {decryptedData && (
+        <div className="flex flex-col justify-center items-center mb-8s">
+          <BouncingArrow />
+          <DecryptedDataComponent data={decryptedData} dbName={dbName.charAt(0).toUpperCase() + dbName.slice(1)} />
+        </div>
+      )}
+
+        
+      <FooterComponent />
     </div>
 
   )
