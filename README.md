@@ -1,27 +1,43 @@
-# Next.js + Tailwind CSS Example
+# Data Encryption in Transit
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v3.0)](https://tailwindcss.com/blog/tailwindcss-v3) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
+![file encryption](public/68999-file-encryption.gif)<center>
+<sub><sup>Credits - [Creator: Oscar Daniel Martnez Nez](https://lottiefiles.com/68999-file-encryption)</sup></sub>
+</center>
 
-## Deploy your own
+This demo shows how you can use a tool like Ciphertrust Data Proection gateway and do field level data encrytion with **no change** to your application's code.
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
+## Pre-requisites
+- Deployed Ciphertrust Manager Instance
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
+## How does it work?
+### Step 1 - Add side-car container
+You need to deploy a sidecar container or an agent that proxies all your requests to your container.
 
-## How to use
+It looks something like this if you use [docker-compose](https://docs.docker.com/compose/).
+Note - You can use DPG and Ciphertrust manager with any other Kubernetes or Helm deployment.
+```yml
+version: '3.1'
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
-
-```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
+services:
+  ciphertrust:
+    image: thalesgroup/ciphertrust-data-protection-gateway:latest
+    container_name: ciphertrust
+    environment:
+      - REG_TOKEN=<YOUR_DPG_REG_TOKEN>
+      - DESTINATION_URL=http://nextjs:3000
+      - DPG_PORT=9005
+      - TLS_ENABLED=false
+      - KMS=<YOUR_CM_IP>
+    ports:
+      - 80:9005
 ```
 
-```bash
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
-```
+### Step 2 - Configure DPG policies
+Setup DPG policies in Ciphertrust Manager to encrypt the fields that are encrypted for your POST requests and add a decrypt policy for your get requests.
 
-```bash
-pnpm create next-app --example with-tailwindcss with-tailwindcss-app
-```
+This ensures that the proxy takes care of the encryption and decryption and the database finally ONLY gets encrypted data.
 
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+![dpg policy example](./dpg-policy.png)
+
+### Step 3 - Sit Back and Relax
+Let Ciphertrust Manager do all the magic for you while you focus on building great applications.
