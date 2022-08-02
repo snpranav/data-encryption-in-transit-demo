@@ -10,6 +10,7 @@ import { EncryptedDataComponent } from "../components/EncryptedData";
 import BouncingArrow from "../components/BouncingArrow";
 import { DecryptedDataComponent } from "../components/DecryptedData";
 import FooterComponent from "../components/Footer";
+import { FaGithub } from "react-icons/fa";
 
 export default function DPG() {
   const [file, setFile] = useState(null);
