@@ -1,3 +1,5 @@
+import { FaGithub, FaTwitter } from "react-icons/fa"
+
 export default function FooterComponent() {
     return (
         <footer className="flex flex-col h-24 w-full items-center justify-center border-t">
