@@ -28,8 +28,7 @@ export default function DPG() {
     dateOfBirth: "",
     ssn: "",
     dateOfAppointment: "",
-    insuranceID: "",
-    driversLicenseURL: ""
+    insuranceID: ""
   });
 
   // Handle form input changes
@@ -193,7 +192,7 @@ export default function DPG() {
               <label className="block mb-2 text font-medium text-gray-900">Insurance ID</label>
               <input
                 type="text"
-                placeholder="Enter Social Security Number"
+                placeholder="Enter Insurance ID"
                 className=" focus:outline-none flex-1 px-2 rounded-md text-black border-2 border-blue-600"
                 onChange={e => handleInputChange(e)}
                 name="insuranceID"
