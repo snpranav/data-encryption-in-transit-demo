@@ -1,4 +1,5 @@
 # Data Encryption in Transit
+**Tutorial guide and Demo Video can be found on [CipherTrust Learn](https://thalesgroup.github.io/ciphertrust/docs/connectors/data-encryption-in-transit-docker)**
 
 ![file encryption](public/68999-file-encryption.gif)<center>
 <sub><sup>Credits - [Creator: Oscar Daniel Martnez Nez](https://lottiefiles.com/68999-file-encryption)</sup></sub>
